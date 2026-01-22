@@ -39,33 +39,29 @@ void ALPGunSteppingAction::UserSteppingAction(const G4Step* step)
     fScoringVolume3 = detectorConstruction->GetScoringVolume3();   
   }
   G4Track* tr = step->GetTrack();
-  G4String preVolume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
-  G4String postVolume = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume() != NULL ? step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName() : "null";
-  if ((preVolume != "Absorber") and (postVolume == "Absorber")) {
-	ALPGunTrackInfo* checkInfo = dynamic_cast<ALPGunTrackInfo*>(tr->GetUserInformation());
-	if (!checkInfo) {
-		ALPGunTrackInfo* trackInfo = new ALPGunTrackInfo(tr->GetParticleDefinition()->GetPDGEncoding());
-		tr->SetUserInformation(trackInfo);
-	}
+
+  const auto* secondaries = step->GetSecondaryInCurrentStep();
+  if (secondaries and !secondaries->empty()){
+    for (const G4Track* sec : *secondaries) {
+      if (sec->GetUserInformation() == nullptr) {
+         auto* secInfo = new ALPGunTrackInfo(tr->GetParticleDefinition()->GetPDGEncoding());
+         const_cast<G4Track*>(sec)->SetUserInformation(secInfo);
+      }
+    }
   }
 
-  if (preVolume == "Absorber") {
-    const std::vector<const G4Track*>* secondaries = step->GetSecondaryInCurrentStep();
-    if (!secondaries->empty()) {
-        ALPGunTrackInfo* parentInfo = dynamic_cast<ALPGunTrackInfo*>(tr->GetUserInformation());
-        for (const G4Track* sec : *secondaries) {
-            if (parentInfo) {
-                ALPGunTrackInfo* secInfo = new ALPGunTrackInfo(parentInfo->GetTag());
-                const_cast<G4Track*>(sec)->SetUserInformation(secInfo);
-            }
-        }
-    }
-    G4String postStepVolume = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
-    if (postStepVolume == "Gap") {
-	    ALPGunTrackInfo* trackInfo = (ALPGunTrackInfo*)(tr->GetUserInformation());
+  G4String preVolume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
+  G4String postVolume = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume() != NULL ? step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName() : "null";
+  
+  if ((preVolume != "Absorber") and (postVolume == "Absorber")) {
+    /*if (tr->GetParticleDefinition()->GetPDGEncoding() == 111) {
+      //if (tr->GetCurrentStepNumber() == 1) {
+          if (tr->GetTrackStatus() == fStopAndKill ||
+        tr->GetTrackStatus() == fKillTrackAndSecondaries) {*/
+            ALPGunTrackInfo* trackInfo = (ALPGunTrackInfo*)(tr->GetUserInformation());
 	    analysisManager->FillNtupleDColumn(0, G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID());
 	    analysisManager->FillNtupleDColumn(1, tr->GetParticleDefinition()->GetPDGEncoding());
-	    analysisManager->FillNtupleDColumn(2, tr->GetTotalEnergy()/MeV);
+	    analysisManager->FillNtupleDColumn(2, tr->GetKineticEnergy()/MeV);
 	    analysisManager->FillNtupleDColumn(3, tr->GetGlobalTime()/ns);
 	    analysisManager->FillNtupleDColumn(4, tr->GetPosition()[0]/mm);
 	    analysisManager->FillNtupleDColumn(5, tr->GetPosition()[1]/mm);
@@ -73,10 +69,12 @@ void ALPGunSteppingAction::UserSteppingAction(const G4Step* step)
 	    analysisManager->FillNtupleDColumn(7, tr->GetMomentum()[0]/MeV);
 	    analysisManager->FillNtupleDColumn(8, tr->GetMomentum()[1]/MeV);
 	    analysisManager->FillNtupleDColumn(9, tr->GetMomentum()[2]/MeV);
+	    analysisManager->FillNtupleDColumn(9, tr->GetMomentum()[2]/MeV);
 	    analysisManager->FillNtupleDColumn(10, trackInfo->GetTag());
 	    analysisManager->FillNtupleDColumn(11, tr->GetDefinition()->GetPDGCharge());
 	    analysisManager->AddNtupleRow();
-    }
+      //}
+    //}  
   }
 }
 

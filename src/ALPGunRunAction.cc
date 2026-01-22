@@ -52,6 +52,7 @@ void ALPGunRunAction::BeginOfRunAction(const G4Run*)
   analysisManager->CreateNtupleDColumn("pz");
   analysisManager->CreateNtupleDColumn("Mother");
   analysisManager->CreateNtupleDColumn("Charge");
+  analysisManager->CreateNtupleDColumn("PPIPZ");
   analysisManager->FinishNtuple();
 
 
