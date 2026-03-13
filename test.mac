@@ -1,6 +1,6 @@
 /random/setSeeds 965062 341348 277252 897062 668099 282282 155926  195976  69258  502088 428960
 /run/numberOfThreads 4
-/detector/absorberLength 100 mm
+/detector/absorberLength 10 mm
 /detector/ECalLength 440 mm
 /detector/absorberMaterial G4_Pb
 /detector/ECalMaterial G4_CESIUM_IODIDE
