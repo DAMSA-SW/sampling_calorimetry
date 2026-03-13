@@ -17,6 +17,9 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 add_executable(ALPGun ALPGun.cc ${sources} ${headers})
 target_link_libraries(ALPGun ${Geant4_LIBRARIES})
 
+set(ALPGUN_SCRIPTS
+   test.mac, ana.py
+   )
 
 foreach(_script ${ALPGUN_SCRIPTS})
   configure_file(
